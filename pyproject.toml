@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "csv2pg"
+version = "0.1.0"
+description = ""
+authors = ["Rohit Kumar Singh <25040525+rks0nax@users.noreply.github.com>"]
+readme = "README.md"
+package-mode = false
+
+[tool.poetry.dependencies]
+python = "^3.12"
+pandas = "^2.2.3"
+psycopg2 = "^2.9.10"
+click = "^8.1.8"
+survey = "^5.4.2"
+python-dotenv = "^1.0.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
