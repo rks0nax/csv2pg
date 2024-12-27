@@ -27,6 +27,8 @@ def generate_data_pairs(row, selected_columns: list[tuple[str, str]]) -> list[tu
             data.append((column, int(row[column])))
         elif isinstance(row[column], int):
             data.append((column, row[column]))
+        elif type(row[column] ) == float and row[column] % 1 == 0:
+            data.append((column, int(row[column])))
         else:
             data.append((column, f"'{row[column]}'"))
     return data
@@ -103,7 +105,7 @@ def main(csv_file: str, clear_table: bool):
     # -- Begin inserting the data
     print(f"\nInserting file {make_bold(csv_file)} into table {make_bold(schema)}.{make_bold(table)}")
     progress = survey.graphics.MultiLineProgressControl(df.shape[0], color = survey.colors.basic('blue' ))
-    with survey.graphics.MultiLineProgress([progress], prefix = f"Inserting into {schema}.{table}"):
+    with survey.graphics.MultiLineProgress([progress], prefix = f"Inserting "):
       with get_db() as conn:
         cursor = conn.cursor()
         for index, row in df.iterrows():
