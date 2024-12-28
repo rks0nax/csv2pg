@@ -38,3 +38,9 @@ def truncate_table(conn: psycopg2.extensions.connection, schema: str, table: str
     cursor.execute(f"TRUNCATE TABLE {schema}.{table};")
     conn.commit()
     cursor.close()
+
+def get_all_columns(conn: psycopg2.extensions.connection, schema: str, table: str) -> list[tuple[str, str]]:
+    cursor = conn.cursor()
+    cursor.execute(f"SELECT column_name, data_type FROM information_schema.columns WHERE table_schema = '{schema}' AND table_name = '{table}';")
+    columns = cursor.fetchall()
+    return columns
