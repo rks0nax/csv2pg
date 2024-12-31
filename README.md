@@ -32,19 +32,21 @@ This script reads CSV file and inserts the data into a specified table in a data
 To run the script, use the following command:
 
 ```sh
-python main.py -f <csv_file_path> [--clear-table]
+python main.py -f <csv_file_path> [--clear-table] [--checkpoint-file <checkpoint_file_path>] [--error-file <error_file_path>]
 ```
 
 ### Example
 
 ```sh
-python main.py -f data.csv --clear-table
+python main.py -f data.csv --clear-table --checkpoint-file checkpoint.txt --error-file errors.csv
 ```
 
 ### Options
 
 - `-f, --file`: Path to the CSV file (required).
 - `--clear-table`: Clear the table before inserting data (optional).
+- `--checkpoint-file`: Path to the checkpoint file to resume from a previous state (optional).
+- `--error-file`: Path to the error log file to log rows that failed to insert (optional).
 
 ## Functionality
 
@@ -54,6 +56,8 @@ python main.py -f data.csv --clear-table
 4. It reads the CSV file and checks if the columns match the table structure.
 5. It allows the user to select/deselect columns to insert.
 6. It inserts the data into the table, optionally truncating the table first.
+7. It supports resuming from a checkpoint file to continue from where it left off.
+8. It logs any rows that fail to insert into an error log file.
 
 ## License
 
