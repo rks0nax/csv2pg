@@ -1,56 +1,62 @@
 from typing import Any
 
 
-def generate_query_string(data: list[tuple[str, Any]], table: str, schema: str) -> str|None:
+def generate_query_string(rows: list[list[Any]], selected_columns: list[tuple[str, str]], table: str, schema: str) -> str|None:
     """
     Generates an SQL INSERT query string for the given data, table, and schema.
 
     Args:
-      data (list[tuple[str, str]]): A list of tuples where each tuple contains a column name and its corresponding value.
-      table (str): The name of the table to insert data into.
-      schema (str): The name of the schema to which the table belongs.
+        rows (list[list[Any]]): A list of data rows, where each row is a list of values corresponding to the selected columns.
+        selected_columns (list[tuple[str, str]]): A list of tuples where each tuple contains a column name and its data type.
+        table (str): The name of the table.
+        schema (str): The name of the schema.
 
     Returns:
-      str: The generated SQL INSERT query string.
+        str: The generated SQL INSERT query string.
     """
-    if not data:
+    if not rows:
         return None
     query = f"INSERT INTO {schema}.{table} ("
-    for column, _ in data:
+    for column, _ in selected_columns:
         query += f"{column},"
-    query = query[:-1] + ") VALUES ("
-    for _, val in data:
-        if isinstance(val, str):
-            if val.startswith("'") and val.endswith("'"):
-                val = f"'{val[1:-1].replace("'", "''")}'" # Escape single quotes in string values
-            else:
-                val = val.replace("'", "''")  # Escape single quotes in string values
-        query += f"{val},"
-    query = query[:-1] + ");"
+    query = query[:-1] + ") VALUES "
+    for row in rows:
+        query += "("
+        for val in row:
+            if val is None:
+                val = "NULL"
+            elif isinstance(val, str):
+                if val.startswith("'") and val.endswith("'"):
+                    val = f"'{val[1:-1].replace("'", "''")}'" # Escape single quotes
+                else:
+                    val = val.replace("'", "''")
+            query += f"{val},"
+        query = query[:-1] + "),"
+    query = query[:-1] + ";"
     return query
 
-def generate_data_pairs(row, selected_columns: list[tuple[str, str]]) -> list[tuple[str, str]]:
+def generate_row(row, selected_columns: list[tuple[str, str]]) -> list[Any]:
     """
-    Generate a list of data pairs from a row based on selected columns and their data types.
+    Generate a row of data from a row based on selected columns.
 
     Args:
       row (dict): A dictionary representing a row of data with column names as keys.
       selected_columns (list[tuple[str, str]]): A list of tuples where each tuple contains a column name and its data type.
 
     Returns:
-      list[tuple[str, str]]: A list of tuples where each tuple contains a column name and its corresponding value, 
-                   formatted according to its data type.
+      list[Any]: A list of values corresponding to the selected columns in the row.
     """
-    data: list[tuple[str, str]] = []
+
+    data: list[Any] = []
     for column, dtype in selected_columns:
         if column not in row or row[column] in [None, 'NULL']:
-            continue
-        if dtype == 'bigint' or dtype == 'integer':
-            data.append((column, int(row[column])))
+            data.append(None)
+        elif dtype == 'bigint' or dtype == 'integer':
+            data.append(int(row[column]))
         elif isinstance(row[column], int):
-            data.append((column, row[column]))
+            data.append(row[column])
         elif type(row[column] ) == float and row[column] % 1 == 0:
-            data.append((column, int(row[column])))
+            data.append(int(row[column]))
         else:
-            data.append((column, f"'{row[column]}'"))
+            data.append(f"'{row[column]}'")
     return data
