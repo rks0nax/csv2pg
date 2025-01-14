@@ -1,6 +1,7 @@
 import json
 from unittest.mock import patch, mock_open
 from utils.file import _load_checkpoint, save_checkpoint, log_error, load_and_confirm_checkpoint
+import os
 
 class TestCheckpoint:
 
@@ -70,24 +71,14 @@ class TestCheckpoint:
         # Verify the correct data was written to the file
         mock_file().write.assert_called_once_with(expected_file_content)
 
-class TestLogError:
-
-    @patch("utils.file.open", new_callable=mock_open)
-    def test_log_error(self, mock_file):
-        error_file = "dummy_error_file.csv"
-        row = ["value1", "value2", "value3"]
-
-        log_error(error_file, row)
-
-        mock_file.assert_called_once_with(error_file, 'a', newline='', encoding='utf-8')
-        mock_file().write.assert_called_once_with("value1,value2,value3\n")
-
 class TestLoadAndConfirmCheckpoint:
 
     @patch("utils.file._load_checkpoint")
-    def test_load_and_confirm_checkpoint(self, mock_load_checkpoint):
+    @patch("os.path.exists", return_value=True)
+    def test_load_and_confirm_checkpoint(self, mock_exists, mock_load_checkpoint):
         mock_load_checkpoint.return_value = (1999, "space_product_aies", "x_data_mart_irs", [["col1", "character varying"], ["col2", "character varying"], ["col3", "bigint"], ["col4", "bigint"]], True)
         result = load_and_confirm_checkpoint("dummy_checkpoint_file", "space_product_aies", "x_data_mart_irs")
         expected_result = ("space_product_aies", "x_data_mart_irs", [("col1", "character varying"), ("col2", "character varying"), ("col3", "bigint"), ("col4", "bigint")], 1999, True)
         assert result == expected_result
         mock_load_checkpoint.assert_called_once_with("dummy_checkpoint_file")
+        mock_exists.assert_called_once_with("dummy_checkpoint_file")

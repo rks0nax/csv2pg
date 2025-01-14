@@ -16,11 +16,14 @@ def generate_query_string(rows: list[list[Any]], selected_columns: list[tuple[st
     """
     if not rows:
         return None
+    num_rows = 0
     query = f"INSERT INTO {schema}.{table} ("
     for column, _ in selected_columns:
         query += f"{column},"
     query = query[:-1] + ") VALUES "
     for row in rows:
+        if not row:
+            continue
         query += "("
         for val in row:
             if val is None:
@@ -32,7 +35,11 @@ def generate_query_string(rows: list[list[Any]], selected_columns: list[tuple[st
                     val = val.replace("'", "''")
             query += f"{val},"
         query = query[:-1] + "),"
+        num_rows += 1
     query = query[:-1] + ";"
+    # If no rows were added, return None
+    if num_rows == 0:
+        return None
     return query
 
 def generate_row(row, selected_columns: list[tuple[str, str]]) -> list[Any]:
