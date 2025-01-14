@@ -18,11 +18,11 @@ jobs:
       with:
         python-version: '3.12'
 
-    - name: Install Poetry
+    - name: Install dependencies
       run: |
         curl -sSL https://install.python-poetry.org | python3 -
+        poetry install --with test
 
-    - name: Install dependencies and run tests
+    - name: Run tests
       run: |
-        poetry install && poetry run pytest
-        
+        poetry run pytest
