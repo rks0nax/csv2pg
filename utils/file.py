@@ -29,12 +29,14 @@ def _load_checkpoint(file_path: str) -> tuple[int, str, str, list[str], bool]:
             return -1, '', '', [], False
         return data['checkpoint'], data['schema'], data['table'], data['columns'], True
 
-def load_and_confirm_checkpoint(checkpoint_file: str) -> tuple[str, str, list[tuple[str, str]], int, bool]:
+def load_and_confirm_checkpoint(checkpoint_file: str, schema: str, table: str) -> tuple[str, str, list[tuple[str, str]], int, bool]:
     """
     Loads the checkpoint file and confirms with the user if they want to continue with the saved state.
 
     Args:
         checkpoint_file (str): The path to the checkpoint file.
+        schema (str): The schema name.
+        table (str): The table name.
 
     Returns:
         tuple: A tuple containing:
@@ -46,6 +48,9 @@ def load_and_confirm_checkpoint(checkpoint_file: str) -> tuple[str, str, list[tu
     """
     if os.path.exists(checkpoint_file):
         last_checkpoint, saved_schema, saved_table, saved_columns, status = _load_checkpoint(checkpoint_file)
+        if saved_schema != schema or saved_table != table:
+            print(f"Error: Schema or table mismatch in checkpoint file {checkpoint_file}")
+            return "", "", [], -1, False
         if not status:
             print(f"Error: Invalid checkpoint file {checkpoint_file}")
             return "", "", [], -1, False
